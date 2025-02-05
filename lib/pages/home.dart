@@ -113,6 +113,13 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 300, // Adjust size as needed
+                        ),
+                      ),
                       _buildOptionTile('Ingresar', 'ingresar'),
                       _buildOptionTile('Crear nuevo socio/a', 'crear'),
                     ],

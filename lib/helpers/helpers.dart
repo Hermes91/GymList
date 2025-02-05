@@ -11,7 +11,7 @@ String capitalize(String text) {
 Color getStatusColor(UserStatus status) {
   switch (status) {
     case UserStatus.habilitado:
-      return Colors.green;
+      return Color(0xFF80C2AF);
     case UserStatus.vencido:
       return Colors.red;
     case UserStatus.suspendido:

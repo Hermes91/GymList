@@ -14,7 +14,7 @@ class CustomModal {
           title: Text(
             title,
             style: TextStyle(
-              color: isSuccess ? Colors.green : Colors.red,
+              color: isSuccess ? Color(0xFF80C2AF) : Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),

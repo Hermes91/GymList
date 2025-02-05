@@ -186,7 +186,7 @@ class _AdminPanelWidgetState extends State<AdminPanelWidget> {
                                       children: [
                                         IconButton(
                                           icon: const Icon(Icons.edit,
-                                              color: Colors.blue),
+                                              color: Colors.blueGrey),
                                           onPressed: () => _showEditModal(user),
                                         ),
                                         IconButton(
@@ -203,7 +203,7 @@ class _AdminPanelWidgetState extends State<AdminPanelWidget> {
                                                               .suspendido ||
                                                       user.paidMembership
                                                   ? Colors.grey
-                                                  : Colors.green,
+                                                  : Color(0xFF80C2AF),
                                             ),
                                           ),
                                           onPressed: user.status ==
