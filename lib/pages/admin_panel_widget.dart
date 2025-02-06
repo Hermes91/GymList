@@ -6,6 +6,9 @@ import '../models/user.dart';
 import '../models/user_status.dart';
 import '../services/user_service.dart';
 import '../widgets/confirm_membership_modal.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
 
 class AdminPanelWidget extends StatefulWidget {
   const AdminPanelWidget({super.key});
@@ -85,6 +88,13 @@ class _AdminPanelWidgetState extends State<AdminPanelWidget> {
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: () => _exportUsersToCSV(context), // Pass context here
+            tooltip: 'Descargar CSV',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -232,4 +242,30 @@ class _AdminPanelWidgetState extends State<AdminPanelWidget> {
       ),
     );
   }
+}
+
+void _exportUsersToCSV(BuildContext context) async {
+  final box = Hive.box<User>('users');
+  final List<List<String>> rows = [];
+
+  rows.add(["Nombre", "Apellido", "DNI", "Estado", "Fecha de Alta"]);
+
+  for (var user in box.values) {
+    rows.add([
+      user.name,
+      user.surname,
+      user.dni,
+      user.status.displayName,
+      formatDate(user.creationDate),
+    ]);
+  }
+
+  String csvData = const ListToCsvConverter().convert(rows);
+  final directory = await getApplicationDocumentsDirectory();
+  final File file = File('${directory.path}/usuarios.csv');
+  await file.writeAsString(csvData);
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Archivo guardado en: ${file.path}')),
+  );
 }

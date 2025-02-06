@@ -25,80 +25,140 @@ class AdminAccessWidgetState extends State<AdminAccessWidget> {
   }
 
   void _showChangePasswordModal() {
+    final TextEditingController currentPasswordController =
+        TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
     final TextEditingController confirmPasswordController =
         TextEditingController();
 
+    final settingsBox = Hive.box('settings');
+    final String? storedPassword = settingsBox.get('adminPassword');
+
+    bool isButtonDisabled = true;
+
+    void validateFields() {
+      isButtonDisabled = currentPasswordController.text.isEmpty ||
+          newPasswordController.text.isEmpty ||
+          confirmPasswordController.text.isEmpty;
+    }
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Cambiar Contraseña'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Nueva Contraseña',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirmar Contraseña',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Close modal
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newPassword = newPasswordController.text;
-                final confirmPassword = confirmPasswordController.text;
-
-                if (newPassword.isEmpty || confirmPassword.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Por favor, complete todos los campos'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Cambiar Contraseña'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: currentPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Contraseña Actual',
+                      border: OutlineInputBorder(),
                     ),
-                  );
-                  return;
-                }
-
-                if (newPassword != confirmPassword) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Las contraseñas no coinciden'),
-                    ),
-                  );
-                  return;
-                }
-
-                // Save the new password
-                final settingsBox = Hive.box('settings');
-                settingsBox.put('adminPassword', newPassword);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Contraseña actualizada correctamente'),
+                    onChanged: (_) {
+                      setState(() {
+                        validateFields();
+                      });
+                    },
                   ),
-                );
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: newPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Nueva Contraseña',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) {
+                      setState(() {
+                        validateFields();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirmar Contraseña',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) {
+                      setState(() {
+                        validateFields();
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context), // Close modal
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isButtonDisabled
+                      ? null
+                      : () {
+                          final currentPassword =
+                              currentPasswordController.text;
+                          final newPassword = newPasswordController.text;
+                          final confirmPassword =
+                              confirmPasswordController.text;
 
-                Navigator.pop(context);
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
+                          if (currentPassword.isEmpty ||
+                              newPassword.isEmpty ||
+                              confirmPassword.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Por favor, complete todos los campos'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (storedPassword != null &&
+                              currentPassword != storedPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('La contraseña actual es incorrecta'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (newPassword != confirmPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Las contraseñas no coinciden'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          // Save the new password
+                          settingsBox.put('adminPassword', newPassword);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Contraseña actualizada correctamente'),
+                            ),
+                          );
+
+                          Navigator.pop(context);
+                        },
+                  child: const Text('Guardar'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
